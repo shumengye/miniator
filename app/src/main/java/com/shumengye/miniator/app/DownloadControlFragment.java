@@ -13,9 +13,9 @@ import android.widget.TextView;
  */
 public class DownloadControlFragment extends FlipCardFragment {
 
+    private OnDownloadStartListener mCallbackActivity;
     private TextView mProgressStatus;
     private Button mStartDownloadButton;
-    OnDownloadStartListener mCallbackActivity;
 
     @Override
     public void onAttach(Activity activity) {
@@ -26,7 +26,7 @@ public class DownloadControlFragment extends FlipCardFragment {
             mCallbackActivity = (OnDownloadStartListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnImageLoadListener");
+                    + " must implement OnDownloadStartListener");
         }
     }
 
@@ -39,12 +39,7 @@ public class DownloadControlFragment extends FlipCardFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        return inflater.inflate(R.layout.fragment_card_front, container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        View view = inflater.inflate(R.layout.fragment_card_front, container, false);
 
         mProgressStatus = (TextView) view.findViewById(R.id.progress_status);
 
@@ -56,6 +51,8 @@ public class DownloadControlFragment extends FlipCardFragment {
                 downloadListener.startDownload();
             }
         });
+
+        return view;
     }
 
     public void updateProgress(Integer progress) {

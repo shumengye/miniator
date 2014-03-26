@@ -101,12 +101,12 @@ public class ImageLoaderFragment extends Fragment {
     /**
      * ASyncTask for downloading image
      */
-    private static class ImageDownloadAsyncTask extends AsyncTask<Integer, Integer, Boolean> {
+    private static class ImageDownloadAsyncTask extends AsyncTask<Integer, Integer, Bitmap> {
         private WeakReference<ImageLoaderFragment> fragmentWeakRef;
         private String url;
         private Bitmap bitmap;
-        private int reqWidth;
-        private int reqHeight;
+        private int targetWidth;
+        private int targetHeight;
 
         private ImageDownloadAsyncTask (ImageLoaderFragment fragment, String url) {
             this.fragmentWeakRef = new WeakReference<ImageLoaderFragment>(fragment);
@@ -114,28 +114,13 @@ public class ImageLoaderFragment extends Fragment {
         }
 
         @Override
-        protected Boolean doInBackground(Integer... params) {
-            this.reqWidth = params[0];
-            this.reqHeight = params[1];
-
-            try {
-                this.bitmap = this.downloadBitmap(url);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            super.onPostExecute(result);
+        protected void onPostExecute(Bitmap downloadedBitmap) {
+            super.onPostExecute(downloadedBitmap);
             if (this.fragmentWeakRef.get() != null) {
                 ImageLoaderFragment fragment = this.fragmentWeakRef.get();
                 if (fragment != null) {
                     fragment.mCallbackActivity = (OnImageLoadListener) fragment.getActivity();
-                    fragment.mCallbackActivity.showBitmap(this.bitmap);
+                    fragment.mCallbackActivity.showBitmap(downloadedBitmap);
                 }
             }
         }
@@ -151,50 +136,55 @@ public class ImageLoaderFragment extends Fragment {
             }
         }
 
-        private Bitmap downloadBitmap(String url) throws IOException {
+        @Override
+        protected Bitmap doInBackground(Integer... params) {
+            this.targetWidth = params[0];
+            this.targetHeight = params[1];
 
             try {
-                HttpUriRequest request = new HttpGet(url);
-                HttpClient httpClient = new DefaultHttpClient();
-                HttpResponse response = httpClient.execute(request);
+                    HttpUriRequest request = new HttpGet(url);
+                    HttpClient httpClient = new DefaultHttpClient();
+                    HttpResponse response = httpClient.execute(request);
 
-                byte[] data = null;
-                InputStream is = response.getEntity().getContent();
-                int contentSize = (int) response.getEntity().getContentLength();
-                BufferedInputStream bis = new BufferedInputStream(is, 8192);
+                    byte[] data = null;
+                    InputStream is = response.getEntity().getContent();
+                    int contentSize = (int) response.getEntity().getContentLength();
+                    BufferedInputStream bis = new BufferedInputStream(is, 8192);
 
-                data = new byte[contentSize];
-                int bytesRead = 0;
-                int offset = 0;
+                    data = new byte[contentSize];
+                    int bytesRead = 0;
+                    int offset = 0;
 
-                while (bytesRead != -1 && offset < contentSize) {
-                    bytesRead = bis.read(data, offset, contentSize - offset);
-                    offset += bytesRead;
-                    // Publish % of download as progress
-                    publishProgress((int) ((offset * 100) / contentSize));
-                }
+                    while (bytesRead != -1 && offset < contentSize) {
+                        bytesRead = bis.read(data, offset, contentSize - offset);
+                        offset += bytesRead;
+                        // Publish % of download as progress
+                        publishProgress((int) ((offset * 100) / contentSize));
+                    }
 
-                // Decode with inJustDecodeBounds=true to check original dimensions
-                final BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeByteArray(data, 0, data.length, options);
+                    // Decode with inJustDecodeBounds=true to check original dimensions
+                    final BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
-                // Calculate inSampleSize for down sampling size
-                options.inSampleSize = calculateImageDownSampleSize(options.outWidth, options.outHeight, this.reqWidth, this.reqHeight);
-                options.inJustDecodeBounds = false;
+                    // Calculate inSampleSize for down sampling size
+                    options.inSampleSize = calculateImageDownSampleSize(options.outWidth, options.outHeight, this.targetWidth, this.targetHeight);
+                    options.inJustDecodeBounds = false;
 
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
-                // Save bitmap to memory cache
-                ImageLoaderFragment fragment = this.fragmentWeakRef.get();
-                if (fragment != null) {
-                    fragment.addBitmapToMemoryCache(IMAGE_KEY, bitmap);
-                }
-                return bitmap;
-
-            } catch (IOException e) {
-                throw new IOException(e);
+                    // Save bitmap to memory cache
+                    ImageLoaderFragment fragment = this.fragmentWeakRef.get();
+                    if (fragment != null) {
+                        fragment.addBitmapToMemoryCache(IMAGE_KEY, bitmap);
+                    }
+                    return bitmap;
             }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
         }
 
         /**

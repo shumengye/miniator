@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,8 +16,8 @@ public class MainActivity extends ActionBarActivity
         OnDownloadStartListener {
 
     private static final String IMAGE_URL = "https://dl.dropboxusercontent.com/u/986362/minion1.jpg";
-    //private static final String sImageUrl = "192.168.0.2:8000/minion1.jpg";
-    /** True if back card fragment (DownloadDisplayFragment) is visible */
+
+    /** True if back card (DownloadDisplayFragment) is visible */
     private Boolean mShowingBackCard;
 
     @Override
@@ -26,20 +25,19 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Find image loader fragment, create if it doesn't exist
-        ImageLoaderFragment fragment = (ImageLoaderFragment)
+        // Find ImageLoaderFragment, create if it doesn't exist
+        ImageLoaderFragment loaderFragment = (ImageLoaderFragment)
                 getFragmentManager().findFragmentByTag(ImageLoaderFragment.TAG);
 
-        if (fragment == null) {
-            fragment = new ImageLoaderFragment();
+        if (loaderFragment == null) {
+            loaderFragment = new ImageLoaderFragment();
             getFragmentManager()
-                    .beginTransaction().add(fragment, ImageLoaderFragment.TAG).commit();
+                    .beginTransaction().add(loaderFragment, ImageLoaderFragment.TAG).commit();
         }
 
+        // Add download control
         if (savedInstanceState == null) {
-            Log.d("","CREATING NEW DOWNLOAD CONTROL");
-            getFragmentManager()
-                    .beginTransaction()
+            getFragmentManager().beginTransaction()
                     .add(R.id.container, new DownloadControlFragment())
                     .commit();
         }
@@ -70,6 +68,10 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * @category OnDownloadStartListener.startDownload
+     * Initiates image download with ImageLoaderFragment
+     */
     public void startDownload() {
         ImageLoaderFragment fragment = (ImageLoaderFragment)
                 getFragmentManager().findFragmentByTag(ImageLoaderFragment.TAG);
@@ -105,29 +107,31 @@ public class MainActivity extends ActionBarActivity
 
     /**
      * @category ImageLoaderFragment.OnImageLoadListener
-     * Displays downloaded bitmap
+     * Displays downloaded bitmap in image display fragment. If needed, animates fragment transaction with flip effect
      */
     public void showBitmap(final Bitmap bitmap) {
-
+        // Check currently visible fragment
         Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
 
+        // DownloadControlFragment is currently visible
         if (fragment instanceof DownloadControlFragment) {
 
-        getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener()
-            {
-            public void onBackStackChanged() {
-                Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
-
-                if (fragment instanceof DownloadDisplayFragment) {
-                    DownloadDisplayFragment displayFragment = (DownloadDisplayFragment) fragment;
-                    displayFragment.showBitmap(bitmap);
+            // Show bitmap after flip animation
+            getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+                public void onBackStackChanged() {
+                    Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
+                    if (fragment instanceof DownloadDisplayFragment) {
+                        DownloadDisplayFragment displayFragment = (DownloadDisplayFragment) fragment;
+                        displayFragment.showBitmap(bitmap);
+                    }
                 }
-            }
-        });
+            });
 
+            // Show image display fragment with flip animation
             onFlipCard();
         }
-        else {
+        // DownloadDisplayFragment is currently visible, just show bitmap
+        else if (fragment instanceof DownloadDisplayFragment) {
             DownloadDisplayFragment displayFragment = (DownloadDisplayFragment) fragment;
             displayFragment.showBitmap(bitmap);
         }
@@ -135,7 +139,7 @@ public class MainActivity extends ActionBarActivity
 
     /**
      * @category DownloadControlFragment.OnFlipCardListener
-     * Card flip animation between a front and back card fragment (DownloadControlFragment and DownloadDisplayFragment)
+     * Card flip animation between front and back card (DownloadControlFragment and DownloadDisplayFragment)
      */
     public void onFlipCard() {
         // Back card is visible, pop back fragment from back stack
@@ -148,16 +152,11 @@ public class MainActivity extends ActionBarActivity
         // Front card is visible, add fragment for the back of the card
         getFragmentManager()
                 .beginTransaction()
-
-                // Custom animations for transaction
+                // Flip animations
                 .setCustomAnimations(
                         R.animator.card_flip_right_in, R.animator.card_flip_right_out,
                         R.animator.card_flip_left_in, R.animator.card_flip_left_out)
-
-                // Replace current fragment in container view with fragment for back card
                 .replace(R.id.container, new DownloadDisplayFragment())
-
-                 // Add this transaction to the back stack
                 .addToBackStack(null)
                 .commit();
 
