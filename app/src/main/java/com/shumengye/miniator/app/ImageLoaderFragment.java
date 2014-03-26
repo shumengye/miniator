@@ -7,9 +7,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.LruCache;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -52,17 +49,11 @@ public class ImageLoaderFragment extends Fragment {
         this.mMemoryCache = new LruCache<String, Bitmap>(cacheSize);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return null;
-    }
-
     public void loadImage(String url, Integer targetWidth, Integer targetHeight) {
         final Bitmap bitmap = getBitmapFromMemCache(ImageKey);
 
         if (bitmap != null) {
-
+            Log.v("","Get image from cache");
             mCallbackActivity = (OnImageLoadListener) getActivity();
             mCallbackActivity.showBitmap(bitmap);
         }
@@ -82,7 +73,6 @@ public class ImageLoaderFragment extends Fragment {
     public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
         int size = (bitmap.getRowBytes() * bitmap.getHeight());
         if (getBitmapFromMemCache(key) == null && size > 8) {
-            Log.v("DEBUG","Saving bitmap to cache ");
             this.mMemoryCache.put(key, bitmap);
         }
     }

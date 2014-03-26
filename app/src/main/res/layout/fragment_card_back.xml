@@ -4,23 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#acc"
+    android:background="#acf"
     android:padding="16dp"
     android:gravity="bottom">
 
-    <Button
-        android:layout_width="107dp"
-        android:layout_height="wrap_content"
-        android:text="Flip"
-        android:id="@+id/flip_button" />
-
-    <TextView android:id="@android:id/text1"
-        style="?android:textAppearanceLarge"
-        android:textStyle="bold"
-        android:textColor="#fff"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world2" />
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/main_image"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerInside"
+        android:adjustViewBounds="true" />
 
 
 </LinearLayout>

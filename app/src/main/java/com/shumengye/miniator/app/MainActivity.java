@@ -1,6 +1,7 @@
 package com.shumengye.miniator.app;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -12,9 +13,9 @@ public class MainActivity extends ActionBarActivity
         implements DownloadControlFragment.OnFlipCardListener,
         ImageLoaderFragment.OnImageLoadListener {
 
-    /** URL of image for download */
+    /** URL of image download */
     private static final String sImageUrl = "https://dl.dropboxusercontent.com/u/986362/minion1.jpg";
-    //private static final String sImageUrl = "https://dl.dropboxusercontent.com/u/986362/photo.JPG";
+    //private static final String sImageUrl = "192.168.0.2:8000/minion1.jpg";
     /** True if back card fragment (DownloadDisplayFragment) is visible */
     private Boolean mShowingBackCard;
 
@@ -91,8 +92,8 @@ public class MainActivity extends ActionBarActivity
         Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
 
         if (fragment instanceof DownloadControlFragment) {
-            DownloadControlFragment downloadControlFragment = (DownloadControlFragment) fragment;
-            downloadControlFragment.updateProgress(progress);
+            DownloadControlFragment controlFragment = (DownloadControlFragment) fragment;
+            controlFragment.updateProgress(progress);
         }
     }
 
@@ -100,8 +101,30 @@ public class MainActivity extends ActionBarActivity
      * @category ImageLoaderFragment.OnImageLoadListener
      * Displays downloaded bitmap
      */
-    public void showBitmap(Bitmap bitmap) {
-        Log.d("DEBUG", "Bitmap ready for display");
+    public void showBitmap(final Bitmap bitmap) {
+
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
+
+        if (fragment instanceof DownloadControlFragment) {
+
+        getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener()
+            {
+            public void onBackStackChanged() {
+                Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
+
+                if (fragment instanceof DownloadDisplayFragment) {
+                    DownloadDisplayFragment displayFragment = (DownloadDisplayFragment) fragment;
+                    displayFragment.showBitmap(bitmap);
+                }
+            }
+        });
+
+            onFlipCard();
+        }
+        else {
+            DownloadDisplayFragment displayFragment = (DownloadDisplayFragment) fragment;
+            displayFragment.showBitmap(bitmap);
+        }
     }
 
     /**

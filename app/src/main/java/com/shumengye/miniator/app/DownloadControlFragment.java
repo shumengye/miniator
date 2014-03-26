@@ -19,9 +19,6 @@ public class DownloadControlFragment extends FlipCardFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setRetainInstance(true);
-
     }
 
     @Override
@@ -36,13 +33,6 @@ public class DownloadControlFragment extends FlipCardFragment {
         super.onViewCreated(view, savedInstanceState);
 
         mProgressStatus = (TextView) view.findViewById(R.id.progress_status);
-
-        final Button flipButton = (Button) view.findViewById(R.id.flip_button);
-        flipButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    mCallback.onFlipCard();
-                }
-        });
 
         mStartDownloadButton = (Button) view.findViewById(R.id.download_button);
         mStartDownloadButton.setOnClickListener(new View.OnClickListener() {

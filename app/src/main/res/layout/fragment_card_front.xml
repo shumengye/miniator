@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#a6c"
+    android:background="#fcdc58"
     android:padding="16dp"
     android:gravity="bottom">
 
@@ -22,11 +22,5 @@
         android:layout_height="wrap_content"
         android:text="Download"
         android:id="@+id/download_button" />
-
-    <Button
-        android:layout_width="107dp"
-        android:layout_height="wrap_content"
-        android:text="Flip"
-        android:id="@+id/flip_button" />
 
 </LinearLayout>
