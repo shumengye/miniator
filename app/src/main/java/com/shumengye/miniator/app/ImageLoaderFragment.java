@@ -24,9 +24,9 @@ import java.lang.ref.WeakReference;
  */
 public class ImageLoaderFragment extends Fragment {
     public static final String TAG = "ImageLoaderFragment";
-    public static final String sImageKey = "MiniatorImage";
+    public static final String IMAGE_KEY = "MiniatorImage";
 
-    private WeakReference<MyAsyncTask> asyncTaskWeakRef;
+    private WeakReference<ImageDownloadAsyncTask> asyncTaskWeakRef;
     private LruCache mMemoryCache;
     OnImageLoadListener mCallbackActivity;
 
@@ -63,16 +63,16 @@ public class ImageLoaderFragment extends Fragment {
     }
 
     public void loadBitmap(String url, Integer targetWidth, Integer targetHeight) {
-        // Return straight from cache if possible
-        final Bitmap bitmap = getBitmapFromMemCache(sImageKey);
+        // Return image from cache if possible
+        final Bitmap bitmap = getBitmapFromMemCache(IMAGE_KEY);
         if (bitmap != null) {
             mCallbackActivity = (OnImageLoadListener) getActivity();
             mCallbackActivity.showBitmap(bitmap);
         }
         // Load bitmap asynchronously
         else if (!isAsyncTaskPendingOrRunning()) {
-            MyAsyncTask asyncTask = new MyAsyncTask(this, url);
-            this.asyncTaskWeakRef = new WeakReference<MyAsyncTask>(asyncTask);
+            ImageDownloadAsyncTask asyncTask = new ImageDownloadAsyncTask(this, url);
+            this.asyncTaskWeakRef = new WeakReference<ImageDownloadAsyncTask>(asyncTask);
             asyncTask.execute(targetWidth, targetHeight);
         }
     }
@@ -98,15 +98,17 @@ public class ImageLoaderFragment extends Fragment {
         return null;
     }
 
-    private static class MyAsyncTask extends AsyncTask<Integer, Integer, Boolean> {
-
+    /**
+     * ASyncTask for downloading image
+     */
+    private static class ImageDownloadAsyncTask extends AsyncTask<Integer, Integer, Boolean> {
         private WeakReference<ImageLoaderFragment> fragmentWeakRef;
         private String url;
         private Bitmap bitmap;
         private int reqWidth;
         private int reqHeight;
 
-        private MyAsyncTask (ImageLoaderFragment fragment, String url) {
+        private ImageDownloadAsyncTask (ImageLoaderFragment fragment, String url) {
             this.fragmentWeakRef = new WeakReference<ImageLoaderFragment>(fragment);
             this.url = url;
         }
@@ -180,13 +182,13 @@ public class ImageLoaderFragment extends Fragment {
                 // Calculate inSampleSize for down sampling size
                 options.inSampleSize = calculateImageDownSampleSize(options.outWidth, options.outHeight, this.reqWidth, this.reqHeight);
                 options.inJustDecodeBounds = false;
-                
+
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
                 // Save bitmap to memory cache
                 ImageLoaderFragment fragment = this.fragmentWeakRef.get();
                 if (fragment != null) {
-                    fragment.addBitmapToMemoryCache(sImageKey, bitmap);
+                    fragment.addBitmapToMemoryCache(IMAGE_KEY, bitmap);
                 }
                 return bitmap;
 
@@ -199,7 +201,7 @@ public class ImageLoaderFragment extends Fragment {
          * Calculates down sampling size for bitmap based on target dimensions
          */
         private static int calculateImageDownSampleSize(int imageWidth, int imageHeight, int targetWidth, int targetHeight) {
-            int inSampleSize = 1;
+            int downSampleSize = 1;
 
             if (imageWidth > targetWidth || imageHeight > targetHeight) {
 
@@ -208,13 +210,13 @@ public class ImageLoaderFragment extends Fragment {
 
                 // Calculate the largest inSampleSize value that is a power of 2 and keeps both
                 // height and width larger than the requested height and width.
-                while ((halfHeight / inSampleSize) > targetHeight
-                        && (halfWidth / inSampleSize) > targetWidth) {
-                    inSampleSize *= 2;
+                while ((halfHeight / downSampleSize) > targetHeight
+                        && (halfWidth / downSampleSize) > targetWidth) {
+                    downSampleSize *= 2;
                 }
             }
 
-            return inSampleSize;
+            return downSampleSize;
         }
     }
 }
