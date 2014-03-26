@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.LruCache;
 
 import org.apache.http.HttpResponse;
@@ -119,8 +118,8 @@ public class ImageLoaderFragment extends Fragment {
 
             try {
                 this.bitmap = this.downloadBitmap(url);
-
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 e.printStackTrace();
             }
 
@@ -151,64 +150,66 @@ public class ImageLoaderFragment extends Fragment {
         }
 
         private Bitmap downloadBitmap(String url) throws IOException {
-            Log.v("DEBUG","Downloading " + url);
-            HttpUriRequest request = new HttpGet(url);
-            HttpClient httpClient = new DefaultHttpClient();
-            HttpResponse response = httpClient.execute(request);
 
-            byte[] data = null;
-            InputStream is = response.getEntity().getContent();
-            int contentSize = (int) response.getEntity().getContentLength();
-            BufferedInputStream bis = new BufferedInputStream(is, 8192);
+            try {
+                HttpUriRequest request = new HttpGet(url);
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpResponse response = httpClient.execute(request);
 
-            data = new byte[contentSize];
-            int bytesRead = 0;
-            int offset = 0;
+                byte[] data = null;
+                InputStream is = response.getEntity().getContent();
+                int contentSize = (int) response.getEntity().getContentLength();
+                BufferedInputStream bis = new BufferedInputStream(is, 8192);
 
-            while (bytesRead != -1 && offset < contentSize) {
-                bytesRead = bis.read(data, offset, contentSize - offset);
-                offset += bytesRead;
+                data = new byte[contentSize];
+                int bytesRead = 0;
+                int offset = 0;
 
-                publishProgress((int)((offset*100) / contentSize));
+                while (bytesRead != -1 && offset < contentSize) {
+                    bytesRead = bis.read(data, offset, contentSize - offset);
+                    offset += bytesRead;
+                    // Publish % of download as progress
+                    publishProgress((int) ((offset * 100) / contentSize));
+                }
+
+                // Decode with inJustDecodeBounds=true to check original dimensions
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeByteArray(data, 0, data.length, options);
+
+                // Calculate inSampleSize for down sampling size
+                options.inSampleSize = calculateImageDownSampleSize(options.outWidth, options.outHeight, this.reqWidth, this.reqHeight);
+                options.inJustDecodeBounds = false;
+                
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+
+                // Save bitmap to memory cache
+                ImageLoaderFragment fragment = this.fragmentWeakRef.get();
+                if (fragment != null) {
+                    fragment.addBitmapToMemoryCache(sImageKey, bitmap);
+                }
+                return bitmap;
+
+            } catch (IOException e) {
+                throw new IOException(e);
             }
-
-            // First decode with inJustDecodeBounds=true to check original dimensions
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(data, 0, data.length, options);
-
-            // Calculate inSampleSize for down sampling size
-            options.inSampleSize = calculateInSampleSize(options, this.reqWidth, this.reqHeight);
-            options.inJustDecodeBounds = false;
-            options.inPreferredConfig = Bitmap.Config.RGB_565;
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
-            Log.i("DEBUG", "Final size " + options.outWidth + ", " + options.outHeight);
-            Log.i("DEBUG", "Final bytes " + (bitmap.getRowBytes() * bitmap.getHeight()));
-
-            // Save bitmap to memory cache
-            ImageLoaderFragment fragment = this.fragmentWeakRef.get();
-            if (fragment != null) {
-                fragment.addBitmapToMemoryCache(sImageKey, bitmap);
-            }
-
-            return bitmap;
         }
 
-        private  int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-            // Raw height and width of image
-            final int height = options.outHeight;
-            final int width = options.outWidth;
+        /**
+         * Calculates down sampling size for bitmap based on target dimensions
+         */
+        private static int calculateImageDownSampleSize(int imageWidth, int imageHeight, int targetWidth, int targetHeight) {
             int inSampleSize = 1;
 
-            if (height > reqHeight || width > reqWidth) {
+            if (imageWidth > targetWidth || imageHeight > targetHeight) {
 
-                final int halfHeight = height / 2;
-                final int halfWidth = width / 2;
+                final int halfHeight = imageHeight / 2;
+                final int halfWidth = imageWidth / 2;
 
                 // Calculate the largest inSampleSize value that is a power of 2 and keeps both
                 // height and width larger than the requested height and width.
-                while ((halfHeight / inSampleSize) > reqHeight
-                        && (halfWidth / inSampleSize) > reqWidth) {
+                while ((halfHeight / inSampleSize) > targetHeight
+                        && (halfWidth / inSampleSize) > targetWidth) {
                     inSampleSize *= 2;
                 }
             }
