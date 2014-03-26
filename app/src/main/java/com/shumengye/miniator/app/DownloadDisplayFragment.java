@@ -12,6 +12,14 @@ import android.widget.Button;
 public class DownloadDisplayFragment extends FlipCardFragment {
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Retain fragment state
+        setRetainInstance(true);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -22,7 +30,7 @@ public class DownloadDisplayFragment extends FlipCardFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final Button flipButton = (Button) view.findViewById(R.id.flipbutton);
+        final Button flipButton = (Button) view.findViewById(R.id.flip_button);
         if (flipButton != null) {
             flipButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {

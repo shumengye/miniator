@@ -12,7 +12,7 @@
         android:layout_width="107dp"
         android:layout_height="wrap_content"
         android:text="Flip"
-        android:id="@+id/flipbutton" />
+        android:id="@+id/flip_button" />
 
     <TextView android:id="@android:id/text1"
         style="?android:textAppearanceLarge"

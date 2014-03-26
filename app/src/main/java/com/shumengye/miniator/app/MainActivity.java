@@ -1,13 +1,20 @@
 package com.shumengye.miniator.app;
 
+import android.app.Fragment;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends ActionBarActivity
-        implements DownloadControlFragment.OnFlipCardListener{
+        implements DownloadControlFragment.OnFlipCardListener,
+        ImageLoaderFragment.OnImageLoadListener {
 
+    /** URL of image for download */
+    private static final String sImageUrl = "https://dl.dropboxusercontent.com/u/986362/minion1.jpg";
+    //private static final String sImageUrl = "https://dl.dropboxusercontent.com/u/986362/photo.JPG";
     /** True if back card fragment (DownloadDisplayFragment) is visible */
     private Boolean mShowingBackCard;
 
@@ -16,14 +23,25 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Find image loader fragment, create if it doesn't exist
+        ImageLoaderFragment fragment = (ImageLoaderFragment)
+                getFragmentManager().findFragmentByTag(ImageLoaderFragment.TAG);
+
+        if (fragment == null) {
+            fragment = new ImageLoaderFragment();
+            getFragmentManager()
+                    .beginTransaction().add(fragment, ImageLoaderFragment.TAG).commit();
+        }
+
         if (savedInstanceState == null) {
+            Log.d("","CREATING NEW DOWNLOAD CONTROL");
             getFragmentManager()
                     .beginTransaction()
                     .add(R.id.container, new DownloadControlFragment())
                     .commit();
         }
 
-
+        // TODO: Do not base fragment visibility on back stack size
         if (getFragmentManager().getBackStackEntryCount() > 0) {
             mShowingBackCard = true;
         }
@@ -49,7 +67,45 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+    public void startImageDownload() {
+        Log.d("DEBUG", "Download image");
+        ImageLoaderFragment fragment = (ImageLoaderFragment)
+                getFragmentManager().findFragmentByTag(ImageLoaderFragment.TAG);
+
+        fragment.loadImage(sImageUrl, 500, 500);
+    }
+
     /**
+     * @category ImageLoaderFragment.OnImageLoadListener
+     * Actions when download has been initiated but not started yet
+     */
+    public void onPreImageLoad(Integer progress) {
+
+    }
+
+    /**
+     * @category ImageLoaderFragment.OnImageLoadListener
+     * Displays download progress
+     */
+    public void onUpdateImageLoad(Integer progress) {
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
+
+        if (fragment instanceof DownloadControlFragment) {
+            DownloadControlFragment downloadControlFragment = (DownloadControlFragment) fragment;
+            downloadControlFragment.updateProgress(progress);
+        }
+    }
+
+    /**
+     * @category ImageLoaderFragment.OnImageLoadListener
+     * Displays downloaded bitmap
+     */
+    public void showBitmap(Bitmap bitmap) {
+        Log.d("DEBUG", "Bitmap ready for display");
+    }
+
+    /**
+     * @category DownloadControlFragment.OnFlipCardListener
      * Card flip animation between a front and back card fragment (DownloadControlFragment and DownloadDisplayFragment)
      */
     public void onFlipCard() {

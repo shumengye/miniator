@@ -8,19 +8,25 @@
     android:padding="16dp"
     android:gravity="bottom">
 
+    <TextView style="?android:textAppearanceLarge"
+        android:id="@+id/progress_status"
+        android:textAllCaps="true"
+        android:textColor="#80ffffff"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/hello_world" />
+
+    <Button
+        android:layout_width="107dp"
+        android:layout_height="wrap_content"
+        android:text="Download"
+        android:id="@+id/download_button" />
+
     <Button
         android:layout_width="107dp"
         android:layout_height="wrap_content"
         android:text="Flip"
-        android:id="@+id/flipbutton" />
-
-    <TextView style="?android:textAppearanceSmall"
-        android:textAllCaps="true"
-        android:textColor="#80ffffff"
-        android:textStyle="bold"
-        android:lineSpacingMultiplier="1.2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:id="@+id/flip_button" />
 
 </LinearLayout>
