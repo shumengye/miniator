@@ -3,18 +3,20 @@ package com.shumengye.miniator.app;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends ActionBarActivity
         implements DownloadControlFragment.OnFlipCardListener,
-        ImageLoaderFragment.OnImageLoadListener {
+        ImageLoaderFragment.OnImageLoadListener,
+        OnDownloadStartListener {
 
-    /** URL of image download */
-    private static final String sImageUrl = "https://dl.dropboxusercontent.com/u/986362/minion1.jpg";
+    private static final String IMAGE_URL = "https://dl.dropboxusercontent.com/u/986362/minion1.jpg";
     //private static final String sImageUrl = "192.168.0.2:8000/minion1.jpg";
     /** True if back card fragment (DownloadDisplayFragment) is visible */
     private Boolean mShowingBackCard;
@@ -68,12 +70,16 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public void startImageDownload() {
-        Log.d("DEBUG", "Download image");
+    public void startDownload() {
         ImageLoaderFragment fragment = (ImageLoaderFragment)
                 getFragmentManager().findFragmentByTag(ImageLoaderFragment.TAG);
 
-        fragment.loadImage(sImageUrl, 500, 500);
+        // Base target size of image on screen dimensions
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        fragment.loadBitmap(IMAGE_URL, size.x, size.y);
     }
 
     /**

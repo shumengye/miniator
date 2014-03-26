@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#acf"
-    android:padding="16dp"
+    android:background="#ffffff"
+    android:padding="0dp"
     android:gravity="bottom">
 
     <ImageView
@@ -16,6 +16,5 @@
         android:layout_centerHorizontal="true"
         android:scaleType="centerInside"
         android:adjustViewBounds="true" />
-
 
 </LinearLayout>

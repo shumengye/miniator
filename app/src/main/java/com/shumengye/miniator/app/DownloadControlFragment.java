@@ -1,5 +1,6 @@
 package com.shumengye.miniator.app;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,9 +13,22 @@ import android.widget.TextView;
  */
 public class DownloadControlFragment extends FlipCardFragment {
 
-    private View rootView;
     private TextView mProgressStatus;
     private Button mStartDownloadButton;
+    OnDownloadStartListener mCallbackActivity;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // Ensure the container activity has implemented callback interface
+        try {
+            mCallbackActivity = (OnDownloadStartListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnImageLoadListener");
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,8 +51,9 @@ public class DownloadControlFragment extends FlipCardFragment {
         mStartDownloadButton = (Button) view.findViewById(R.id.download_button);
         mStartDownloadButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                MainActivity ac = (MainActivity) mCallback;
-                ac.startImageDownload();
+
+                OnDownloadStartListener downloadListener = (OnDownloadStartListener) getActivity();
+                downloadListener.startDownload();
             }
         });
     }

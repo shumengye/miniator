@@ -1,5 +1,6 @@
 package com.shumengye.miniator.app;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -24,7 +25,7 @@ import java.lang.ref.WeakReference;
  */
 public class ImageLoaderFragment extends Fragment {
     public static final String TAG = "ImageLoaderFragment";
-    public static final String ImageKey= "Minion";
+    public static final String sImageKey = "MiniatorImage";
 
     private WeakReference<MyAsyncTask> asyncTaskWeakRef;
     private LruCache mMemoryCache;
@@ -37,26 +38,39 @@ public class ImageLoaderFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // Ensure the container activity has implemented callback interface
+        try {
+            mCallbackActivity = (OnImageLoadListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnImageLoadListener");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Retain fragment state
         setRetainInstance(true);
 
-        // Initiate memory cache
+        // Create memory cache
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         final int cacheSize = maxMemory / 4;
         this.mMemoryCache = new LruCache<String, Bitmap>(cacheSize);
     }
 
-    public void loadImage(String url, Integer targetWidth, Integer targetHeight) {
-        final Bitmap bitmap = getBitmapFromMemCache(ImageKey);
-
+    public void loadBitmap(String url, Integer targetWidth, Integer targetHeight) {
+        // Return straight from cache if possible
+        final Bitmap bitmap = getBitmapFromMemCache(sImageKey);
         if (bitmap != null) {
-            Log.v("","Get image from cache");
             mCallbackActivity = (OnImageLoadListener) getActivity();
             mCallbackActivity.showBitmap(bitmap);
         }
+        // Load bitmap asynchronously
         else if (!isAsyncTaskPendingOrRunning()) {
             MyAsyncTask asyncTask = new MyAsyncTask(this, url);
             this.asyncTaskWeakRef = new WeakReference<MyAsyncTask>(asyncTask);
@@ -88,14 +102,14 @@ public class ImageLoaderFragment extends Fragment {
     private static class MyAsyncTask extends AsyncTask<Integer, Integer, Boolean> {
 
         private WeakReference<ImageLoaderFragment> fragmentWeakRef;
-        private String serviceURL;
+        private String url;
         private Bitmap bitmap;
         private int reqWidth;
         private int reqHeight;
 
-        private MyAsyncTask (ImageLoaderFragment fragment, String serviceURL) {
+        private MyAsyncTask (ImageLoaderFragment fragment, String url) {
             this.fragmentWeakRef = new WeakReference<ImageLoaderFragment>(fragment);
-            this.serviceURL = serviceURL;
+            this.url = url;
         }
 
         @Override
@@ -104,7 +118,7 @@ public class ImageLoaderFragment extends Fragment {
             this.reqHeight = params[1];
 
             try {
-                this.bitmap = this.downloadBitmap(serviceURL);
+                this.bitmap = this.downloadBitmap(url);
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -174,7 +188,7 @@ public class ImageLoaderFragment extends Fragment {
             // Save bitmap to memory cache
             ImageLoaderFragment fragment = this.fragmentWeakRef.get();
             if (fragment != null) {
-                fragment.addBitmapToMemoryCache(ImageKey, bitmap);
+                fragment.addBitmapToMemoryCache(sImageKey, bitmap);
             }
 
             return bitmap;

@@ -13,6 +13,7 @@ import android.widget.ImageView;
 public class DownloadDisplayFragment extends FlipCardFragment {
 
     private View mView;
+    OnDownloadStartListener mCallbackActivity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,8 +35,8 @@ public class DownloadDisplayFragment extends FlipCardFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        MainActivity ac = (MainActivity) getActivity();
-        ac.startImageDownload();
+        OnDownloadStartListener downloadListener = (OnDownloadStartListener) getActivity();
+        downloadListener.startDownload();
     }
 
     public void showBitmap(Bitmap bitmap) {
