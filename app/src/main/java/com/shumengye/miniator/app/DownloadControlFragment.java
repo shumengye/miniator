@@ -79,14 +79,13 @@ public class DownloadControlFragment extends FlipCardFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-
-        if (mStartDownloadButton.getVisibility() == View.GONE) {
-            outState.putInt("progressSpinning", 1);
+        if (mStartDownloadButton != null) {
+            if (mStartDownloadButton.getVisibility() == View.GONE) {
+                outState.putInt("progressSpinning", 1);
+            } else {
+                outState.putInt("progressSpinning", 0);
+            }
         }
-        else {
-            outState.putInt("progressSpinning", 0);
-        }
-
         super.onSaveInstanceState(outState);
 
     }
