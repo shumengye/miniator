@@ -17,6 +17,7 @@ public class DownloadControlFragment extends FlipCardFragment {
     private Button mStartDownloadButton;
     private TextView mPreProgressStatus;
     private TextView mProgressStatus;
+    private Boolean mHideDownloadButton;
 
     @Override
     public void onAttach(Activity activity) {
@@ -34,6 +35,17 @@ public class DownloadControlFragment extends FlipCardFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mHideDownloadButton = Boolean.FALSE;
+
+        // Get saved visibility for download button from Bundle
+        if (savedInstanceState != null) {
+            Integer hideButton = (Integer) savedInstanceState.get("progressSpinning");
+            if (hideButton != null) {
+                if (hideButton == 1)
+                    mHideDownloadButton = Boolean.TRUE;
+            }
+        }
     }
 
     @Override
@@ -41,10 +53,6 @@ public class DownloadControlFragment extends FlipCardFragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_card_front, container, false);
-
-        mProgressStatus = (TextView) view.findViewById(R.id.progress_status);
-
-        mPreProgressStatus = (TextView) view.findViewById(R.id.predownload_status);
 
         mStartDownloadButton = (Button) view.findViewById(R.id.download_button);
         mStartDownloadButton.setOnClickListener(new View.OnClickListener() {
@@ -55,7 +63,32 @@ public class DownloadControlFragment extends FlipCardFragment {
             }
         });
 
+        mPreProgressStatus = (TextView) view.findViewById(R.id.predownload_status);
+
+        mProgressStatus = (TextView) view.findViewById(R.id.progress_status);
+
+        // Hide download button if progress is being displayed
+        if (mHideDownloadButton) {
+            mStartDownloadButton.setVisibility(View.GONE);
+        }
+
         return view;
+    }
+
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        if (mStartDownloadButton.getVisibility() == View.GONE) {
+            outState.putInt("progressSpinning", 1);
+        }
+        else {
+            outState.putInt("progressSpinning", 0);
+        }
+
+        super.onSaveInstanceState(outState);
+
     }
 
     public void onPreDownload() {
@@ -70,4 +103,5 @@ public class DownloadControlFragment extends FlipCardFragment {
         mProgressStatus.setVisibility(View.VISIBLE);
         mProgressStatus.setText(progress + "%");
     }
+
 }

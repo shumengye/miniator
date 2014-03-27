@@ -34,7 +34,7 @@ public class DownloadDisplayFragment extends FlipCardFragment {
         super.onCreate(savedInstanceState);
 
         // Retain fragment state
-        setRetainInstance(true);
+        //setRetainInstance(true);
     }
 
     @Override

@@ -27,12 +27,12 @@
         android:textAllCaps="true"
         android:textColor="@color/white"
         android:textStyle="bold"
-        android:textSize="40sp"
+        android:textSize="42sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/label_preprogress"
         android:layout_above="@+id/download_button"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="40dp"
         android:visibility="gone"
         />
 
