@@ -31,7 +31,7 @@ public class ImageLoaderFragment extends Fragment {
     OnImageLoadListener mCallbackActivity;
 
     public interface OnImageLoadListener {
-        public void onPreImageLoad(Integer progress);
+        public void onPreImageLoad();
         public void onUpdateImageLoad(Integer progress);
         public void showBitmap(Bitmap bitmap);
     }
@@ -114,6 +114,27 @@ public class ImageLoaderFragment extends Fragment {
         }
 
         @Override
+        protected void onPreExecute() {
+            if (this.fragmentWeakRef.get() != null) {
+                ImageLoaderFragment fragment = this.fragmentWeakRef.get();
+                if (fragment != null) {
+                    fragment.mCallbackActivity = (OnImageLoadListener) fragment.getActivity();
+                    fragment.mCallbackActivity.onPreImageLoad();
+                }
+            }
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
+            if (this.fragmentWeakRef.get() != null) {
+                ImageLoaderFragment fragment = this.fragmentWeakRef.get();
+                if (fragment != null) {
+                    fragment.mCallbackActivity = (OnImageLoadListener) fragment.getActivity();
+                    fragment.mCallbackActivity.onUpdateImageLoad(progress[0]);
+                }
+            }
+        }
+
+        @Override
         protected void onPostExecute(Bitmap downloadedBitmap) {
             super.onPostExecute(downloadedBitmap);
             if (this.fragmentWeakRef.get() != null) {
@@ -121,17 +142,6 @@ public class ImageLoaderFragment extends Fragment {
                 if (fragment != null) {
                     fragment.mCallbackActivity = (OnImageLoadListener) fragment.getActivity();
                     fragment.mCallbackActivity.showBitmap(downloadedBitmap);
-                }
-            }
-        }
-
-        protected void onProgressUpdate(Integer... progress) {
-
-            if (this.fragmentWeakRef.get() != null) {
-                ImageLoaderFragment fragment = this.fragmentWeakRef.get();
-                if (fragment != null) {
-                    fragment.mCallbackActivity = (OnImageLoadListener) fragment.getActivity();
-                    fragment.mCallbackActivity.onUpdateImageLoad(progress[0]);
                 }
             }
         }

@@ -7,8 +7,6 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Display;
-import android.view.Menu;
-import android.view.MenuItem;
 
 public class MainActivity extends ActionBarActivity
         implements DownloadControlFragment.OnFlipCardListener,
@@ -51,23 +49,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     /**
      * @category OnDownloadStartListener.startDownload
      * Initiates image download with ImageLoaderFragment
@@ -88,8 +69,13 @@ public class MainActivity extends ActionBarActivity
      * @category ImageLoaderFragment.OnImageLoadListener
      * Actions when download has been initiated but not started yet
      */
-    public void onPreImageLoad(Integer progress) {
+    public void onPreImageLoad() {
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
 
+        if (fragment instanceof DownloadControlFragment) {
+            DownloadControlFragment controlFragment = (DownloadControlFragment) fragment;
+            controlFragment.onPreDownload();
+        }
     }
 
     /**

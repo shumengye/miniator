@@ -1,26 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#fcdc58"
-    android:padding="16dp"
+    android:padding="30dp"
     android:gravity="bottom">
 
-    <TextView style="?android:textAppearanceLarge"
+    <TextView
         android:id="@+id/progress_status"
         android:textAllCaps="true"
-        android:textColor="#80ffffff"
+        android:textColor="@color/white"
         android:textStyle="bold"
+        android:textSize="100sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:text="@string/label_download_button"
+        android:layout_above="@+id/download_button"
+        android:layout_marginBottom="20dp"
+        android:visibility="gone"
+        />
+
+    <TextView
+        android:id="@+id/predownload_status"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="40sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/label_preprogress"
+        android:layout_above="@+id/download_button"
+        android:layout_marginBottom="20dp"
+        android:visibility="gone"
+        />
 
     <Button
-        android:layout_width="107dp"
+        android:id="@+id/download_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Download"
-        android:id="@+id/download_button" />
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:background="@drawable/border_button"
+        android:text="@string/label_download_button"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="40dp"
+        />
 
-</LinearLayout>
+</RelativeLayout>

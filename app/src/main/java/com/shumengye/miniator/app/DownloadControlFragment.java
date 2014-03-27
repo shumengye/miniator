@@ -14,8 +14,9 @@ import android.widget.TextView;
 public class DownloadControlFragment extends FlipCardFragment {
 
     private OnDownloadStartListener mCallbackActivity;
-    private TextView mProgressStatus;
     private Button mStartDownloadButton;
+    private TextView mPreProgressStatus;
+    private TextView mProgressStatus;
 
     @Override
     public void onAttach(Activity activity) {
@@ -43,6 +44,8 @@ public class DownloadControlFragment extends FlipCardFragment {
 
         mProgressStatus = (TextView) view.findViewById(R.id.progress_status);
 
+        mPreProgressStatus = (TextView) view.findViewById(R.id.predownload_status);
+
         mStartDownloadButton = (Button) view.findViewById(R.id.download_button);
         mStartDownloadButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -55,7 +58,16 @@ public class DownloadControlFragment extends FlipCardFragment {
         return view;
     }
 
+    public void onPreDownload() {
+        mStartDownloadButton.setVisibility(View.GONE);
+
+        mPreProgressStatus.setVisibility(View.VISIBLE);
+    }
+
     public void updateProgress(Integer progress) {
-        mProgressStatus.setText("" + progress);
+        mPreProgressStatus.setVisibility(View.GONE);
+
+        mProgressStatus.setVisibility(View.VISIBLE);
+        mProgressStatus.setText(progress + "%");
     }
 }
