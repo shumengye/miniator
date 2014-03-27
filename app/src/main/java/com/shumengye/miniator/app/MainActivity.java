@@ -13,7 +13,7 @@ public class MainActivity extends ActionBarActivity
         ImageLoaderFragment.OnImageLoadListener,
         OnDownloadStartListener {
 
-    private static final String IMAGE_URL = "https://dl.dropboxusercontent.com/u/986362/minion1.jpg";
+    private static final String IMAGE_URL = "https://dl.dropboxusercontent.com/u/1638040/minion1.jpg";
 
     /** True if back card (DownloadDisplayFragment) is visible */
     private Boolean mShowingBackCard;
